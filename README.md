@@ -6,12 +6,13 @@ A plugin that will be used as an interactive "installer".
 
 Run: 
 
-    mvn com.trashgroup.maven.plugins:installer-maven-plugin:0.1.0-SNAPSHOT:sayhi
+    mvn clean install
+    mvn com.trashgroup.maven.plugins:installer-maven-plugin:0.1.0-SNAPSHOT:install
 
 ## Task tracking 
 
 - (DONE) Initial setup
-- (IN PROGRESS) Retrieve an artifact and unpack to `temp`
+- (DONE) Retrieve an artifact and unpack to `temp`
 - (TODO) Display a list where the a user on the command line can select the artifact to download
 - (TODO) Unpack the artifact and interactively go through a list of specified property files on command line
 - (TODO) Run `mvn generate-sources` in `temp`
