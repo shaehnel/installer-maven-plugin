@@ -1,4 +1,4 @@
-package com.trashgroup.maven.plugins;
+package plugins;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
