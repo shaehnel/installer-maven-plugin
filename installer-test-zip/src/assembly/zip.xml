@@ -5,10 +5,11 @@
     <formats>
         <format>zip</format>
     </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
         <fileSet>
-            <directory>src/assembly</directory>
-            <outputDirectory>target/</outputDirectory>
+            <directory>src/zip</directory>
+            <outputDirectory>/</outputDirectory>
         </fileSet>
     </fileSets>
 </assembly>

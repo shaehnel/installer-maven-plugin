@@ -1,4 +1,4 @@
-package com.trashgroup.maven.plugins.util;
+package com.trashgroup.maven.plugins.internal;
 
 
 import org.codehaus.plexus.components.interactivity.Prompter;

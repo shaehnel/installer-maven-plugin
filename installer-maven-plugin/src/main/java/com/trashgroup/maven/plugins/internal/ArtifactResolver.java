@@ -1,7 +1,5 @@
-package com.trashgroup.maven.plugins.util;
+package com.trashgroup.maven.plugins.internal;
 
-import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.artifact.DefaultArtifact;

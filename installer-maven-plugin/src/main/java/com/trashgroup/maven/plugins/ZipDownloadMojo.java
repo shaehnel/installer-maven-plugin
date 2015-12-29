@@ -1,10 +1,7 @@
 package com.trashgroup.maven.plugins;
 
 
-import com.trashgroup.maven.plugins.util.ArtifactChoice;
-import com.trashgroup.maven.plugins.util.ArtifactResolver;
-import com.trashgroup.maven.plugins.util.Unzipper;
-import com.trashgroup.maven.plugins.util.VersionSelection;
+import com.trashgroup.maven.plugins.internal.*;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -12,19 +9,17 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.codehaus.plexus.components.interactivity.Prompter;
-import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.eclipse.aether.RepositorySystem;
 import org.eclipse.aether.RepositorySystemSession;
-import org.eclipse.aether.artifact.DefaultArtifact;
 import org.eclipse.aether.repository.RemoteRepository;
-import org.eclipse.aether.resolution.*;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 
 
 @Mojo(name = "install")
@@ -45,30 +40,43 @@ public class ZipDownloadMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
 
         final ArtifactChoice artifactChoice = new ArtifactChoice(prompter);
-        artifactChoice.addArtifact("Installer Test", "com.trashgroup.maven.plugins", "installer-test-zip", "pom");
-        artifactChoice.addArtifact("Also the Installer Test", "com.trashgroup.maven.plugins", "installer-test-zip", "pom");
-        artifactChoice.addArtifact("Spring Platform BOM", "io.spring.platform", "platform-bom", "pom");
+        final InstallItem installerTest = new InstallItem("Installer Test", "com.trashgroup.maven.plugins", "installer-test-zip", "pom");
+        installerTest.addInstallOptionFile("replace.properties");
+        installerTest.addInstallOptionFile("options.properties");
+        final InstallItem anotherInstallerTest = new InstallItem("Also the Installer Test", "com.trashgroup.maven.plugins", "installer-test-zip", "pom");
+        final InstallItem springPlatformBom = new InstallItem("Spring Platform BOM", "io.spring.platform", "platform-bom", "pom");
+        artifactChoice.addInstallItem(installerTest);
+        artifactChoice.addInstallItem(anotherInstallerTest);
+        artifactChoice.addInstallItem(springPlatformBom);
 
         final VersionSelection versionSelection = new VersionSelection(prompter);
-
         final ArtifactResolver resolver = new ArtifactResolver(repoSystem, repoSession, remoteRepos);
 
         try {
             // ask for artifact
-            final ArtifactChoice.Item sel = artifactChoice.promptForArtifactSelection();
+            final InstallItem sel = artifactChoice.promptForArtifactSelection();
 
             // ask for artifact version with latest version as default
             final String latestVersion = resolver.findLatestVersion(sel.toString());
             final String version = versionSelection.promptForVersion(latestVersion);
+            sel.setVersion(version);
 
             // resolve ZIP artifact
-            final File repoFile = switchToZipFile(resolver.download(sel.toString() + ":" + version));
-            getLog().info("Retrieved " + repoFile.getAbsolutePath());
+            final File zipFile = switchToZipFile(resolver.download(sel.toString()));
+            getLog().info("Retrieved " + zipFile.getAbsolutePath());
 
             // unzip to temp
             final Path tempDir = Files.createTempDirectory("mvninstaller-");
             getLog().info("Created " + tempDir.toString());
-            new Unzipper().unzip(repoFile, tempDir.toString());
+            new Unzipper().unzip(zipFile, tempDir.toString());
+            final String baseDir = tempDir + "/" +  zipFile;
+
+            // go through property files
+            OptionFilePrompter opf = new OptionFilePrompter(tempDir.toString(), prompter, getLog());
+            for (String filename : sel.getInstallOptionFiles()) {
+                Properties userInput = opf.processFile(filename);
+                userInput.store(new FileWriter(tempDir.toString() + "/" + filename), "user input");
+            }
 
         } catch (Exception e) {
             throw new MojoExecutionException(e.getMessage(), e);
