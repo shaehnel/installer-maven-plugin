@@ -15,4 +15,4 @@ Run:
 - (DONE) Retrieve an artifact and unpack to `temp`
 - (DONE) Display a list where the a user on the command line can select the artifact to download
 - (DONE) Unpack the artifact and interactively go through a list of specified property files on command line
-- (TODO) Run `mvn generate-sources` in `temp`
+- (DONE) Run `mvn generate-sources` in `temp`

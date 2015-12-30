@@ -69,7 +69,6 @@ public class ZipDownloadMojo extends AbstractMojo {
             final Path tempDir = Files.createTempDirectory("mvninstaller-");
             getLog().info("Created " + tempDir.toString());
             new Unzipper().unzip(zipFile, tempDir.toString());
-            final String baseDir = tempDir + "/" +  zipFile;
 
             // go through property files
             OptionFilePrompter opf = new OptionFilePrompter(tempDir.toString(), prompter, getLog());
@@ -77,6 +76,10 @@ public class ZipDownloadMojo extends AbstractMojo {
                 Properties userInput = opf.processFile(filename);
                 userInput.store(new FileWriter(tempDir.toString() + "/" + filename), "user input");
             }
+
+            // run Maven from within zip
+            MavenInvoker invoker =  new MavenInvoker(tempDir.toString());
+            invoker.generateSources();
 
         } catch (Exception e) {
             throw new MojoExecutionException(e.getMessage(), e);
