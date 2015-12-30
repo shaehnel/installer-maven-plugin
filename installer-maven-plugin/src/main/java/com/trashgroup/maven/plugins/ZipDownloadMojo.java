@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Properties;
 
 
-@Mojo(name = "install")
+@Mojo(name = "install", requiresProject = false)
 public class ZipDownloadMojo extends AbstractMojo {
 
     @Component
